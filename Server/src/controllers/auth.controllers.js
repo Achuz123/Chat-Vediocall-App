@@ -5,10 +5,10 @@ import { upsertStreamUser } from "../models/stream.js";
 
 ////////////////////SIGN UP////////////////////
 export async function signup(req, res) {
-  const { email, password, fullname } = req.body;
+  const { email, password, fullName } = req.body;
 
   try {
-    if (!email || !password || !fullname) {
+    if (!email || !password || !fullName) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -36,14 +36,14 @@ export async function signup(req, res) {
     const newUser = await User.create({
       email,
       password,
-      fullname,
+      fullName,
       profilePic: randomAvatar,
     });
 
     try {
-      await createStreamUser({
+      await upsertStreamUser({
         id: newUser._id.toString(),
-        name: newUser.fullname,
+        name: newUser.fullName,
         image: newUser.profilePic || " ",
       });
     } catch (error) {
@@ -150,7 +150,7 @@ export async function onboard(req, res) {
       userId,
       {
         ...req.body,
-        onboarding: true,
+        isOnboarded: true,
       },
       { new: true }
     );
@@ -161,7 +161,7 @@ export async function onboard(req, res) {
     try {
       await upsertStreamUser({
         id: updatedUser._id.toString(),
-        name: updatedUser.fullname,
+        name: updatedUser.fullName,
         image: updatedUser.profilePic || " ",
       });
     } catch (error) {
