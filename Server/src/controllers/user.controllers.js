@@ -1,3 +1,4 @@
+import e from "express";
 import FriendRequest from "../models/FriendRequest.js";
 import User from "../models/User.js";
 
@@ -89,4 +90,77 @@ export async function sendFriendRequest(req, res) {
   }
 }
 
-expo;
+export async function acceptFriendRequest(req, res) {
+  try {
+    const requestId = req.params.id;
+    const friendRequest = await FriendRequest.findById(requestId);
+
+    if (!friendRequest) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+
+    //chcek if the logged in user is the recipient of the request
+
+    if (friendRequest.recipient.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to accept this request" });
+    }
+
+    friendRequest.status = "accepted";
+    await friendRequest.save();
+
+    // Add the users to each other's friends list
+    await User.findByIdAndUpdate(req.user.id, {
+      $addToSet: { friends: friendRequest.sender },
+    });
+
+    await User.findByIdAndUpdate(friendRequest.sender, {
+      $addToSet: { friends: req.user.id },
+    });
+
+    res.status(200).json({ message: "Friend request accepted" });
+  } catch (error) {
+    console.error("Error accepting friend request:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
+export async function getFriendRequest(req, res) {
+  try {
+    const request = await FriendRequest.find({
+      $and: [{ recipient: req.user.id }, { status: "pending" }],
+    }).populate(
+      "sender",
+      "fullName profilePic nativeLanguage learningLanguage "
+    );
+
+    const acceptedRequest = await FriendRequest.find({
+      $and: [{ recipient: req.user.id }, { status: "accepted" }],
+    }).populate(
+      "sender",
+      "fullName profilePic nativeLanguage learningLanguage "
+    );
+
+    res.status(200).json({ request, acceptedRequest });
+  } catch (error) {
+    console.error("Error fetching friend requests:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
+export async function getOutgoingFriendRequests(req, res) {
+  try {
+    const requests = await FriendRequest.find({
+      $and: [{ sender: req.user.id }, { status: "pending" }],
+    }).populate(
+      "recipient",
+      "fullName profilePic nativeLanguage learningLanguage "
+    );
+
+    res.status(200).json({ requests });
+  } catch (error) {
+    console.error("Error fetching outgoing friend requests:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
