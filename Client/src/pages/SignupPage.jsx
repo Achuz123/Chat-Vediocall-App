@@ -10,7 +10,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-  const navigate = useNavigate();
+
   const queryClient = useQueryClient();
 
   const {
@@ -19,16 +19,14 @@ const SignUpPage = () => {
     error,
   } = useMutation({
     mutationFn: signup,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
   });
 
   const handleSignup = (e) => {
     e.preventDefault();
-    signupMutation(signupData, {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: ["authUser"] });
-        navigate("/onboarding");
-      },
-    });
+    signupMutation(signupData);
   };
 
   if (error) {
