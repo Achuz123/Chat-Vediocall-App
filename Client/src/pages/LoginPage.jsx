@@ -19,11 +19,11 @@ const LoginPage = () => {
     error,
   } = useMutation({
     mutationFn: login,
-    onSuccess: async () => {
+    onSuccess: () => {
       console.log("Login successful");
-      await queryClient.invalidateQueries({ queryKey: ["auth-user"] });
+      //queryClient.invalidateQueries({ queryKey: ["auth-user"] });
+      queryClient.refetchQueries({ queryKey: ["authUser"] });
       toast.success("Login successful");
-      window.location.reload();
     },
   });
 

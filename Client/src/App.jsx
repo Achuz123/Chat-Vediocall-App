@@ -12,17 +12,20 @@ import PageLoader from "./components/PageLoader.jsx";
 import Layout from "./components/Layout.jsx";
 
 import useAuthUser from "./hooks/useAuthUser.js";
+import { useThemeStore } from "./store/useThemeStore.js";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
 
+  const { theme } = useThemeStore();
+
   if (isLoading) {
     return <PageLoader />;
   }
   return (
-    <div className="h-screen" data-theme="dark">
+    <div className="h-screen" data-theme={theme}>
       <Routes>
         <Route
           path="/"
