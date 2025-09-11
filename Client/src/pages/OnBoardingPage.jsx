@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { LANGUAGES } from "../constants";
+
 const OnBoardingPage = () => {
   const { authUser } = useAuthUser();
+  const queryClient = new QueryClient();
 
   const [formState, setFormState] = React.useState({
     fullName: authUser?.fullName || "",
@@ -25,19 +27,17 @@ const OnBoardingPage = () => {
 
   const { mutate: OnBoardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
-    onSuccess: (data) => {
-      QueryClient.invalidateQueries({ queryKey: ["authUser"] });
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("Onboarding completed successfully!");
+      // window.location.reload();
     },
     onError: (error) => {
-      toast.error(
-        error?.response?.data?.message || "Failed to complete onboarding."
-      );
+      toast.error(error?.response?.data?.message || "Onboarding failed!");
     },
   });
 
   const handleSubmit = (e) => {
-    e.preventDefault();
     OnBoardingMutation(formState);
   };
 
