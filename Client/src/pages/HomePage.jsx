@@ -44,6 +44,10 @@ const HomePage = () => {
   });
 
   useEffect(() => {
+    if (!outgoingFriendReqs || !Array.isArray(outgoingFriendReqs.requests)) {
+      return;
+    }
+
     const outgoingIds = new Set();
 
     outgoingFriendReqs.requests.forEach((req) => {
@@ -53,6 +57,7 @@ const HomePage = () => {
 
     setOutgoingRequestsIds(outgoingIds);
   }, [outgoingFriendReqs]);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
