@@ -7,8 +7,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./Routes/user.route.js";
 import chatRoutes from "./Routes/chat.route.js";
 import cors from "cors";
-import path from "path ";
-
+import path from "path"; // Correct ES Module syntax
 const app = express();
 const PORT = process.env.PORT;
 
@@ -38,8 +37,8 @@ app.use("/api/chat", chatRoutes);
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
 
