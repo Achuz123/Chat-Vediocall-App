@@ -25,6 +25,7 @@ const HomePage = () => {
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
+    refetchInterval: 5000,
   });
 
   const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({

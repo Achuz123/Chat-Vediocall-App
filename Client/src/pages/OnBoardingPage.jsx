@@ -30,14 +30,17 @@ const OnBoardingPage = () => {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("Onboarding completed successfully!");
-      // window.location.reload();
+      window.location.href = "/";
     },
     onError: (error) => {
-      toast.error(error?.response?.data?.message || "Onboarding failed!");
+      toast.error(
+        `${error.response.data.message} Missing : ${error.response.data.missingFields}`
+      );
     },
   });
 
   const handleSubmit = (e) => {
+    e.preventDefault();
     OnBoardingMutation(formState);
   };
 
