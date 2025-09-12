@@ -25,12 +25,14 @@ const OnBoardingPage = () => {
     profilePic: authUser?.profilePic || null,
   });
 
+  const { refetch } = useAuthUser();
+
   const { mutate: OnBoardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ["authUser"] });
       toast.success("Onboarding completed successfully!");
-      window.location.href = "/";
+
+      await refetch();
     },
     onError: (error) => {
       toast.error(

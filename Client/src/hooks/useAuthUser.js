@@ -10,6 +10,10 @@ const useAuthUser = () => {
 
   // console.log("called");
 
-  return { isLoading: authUser.isLoading, authUser: authUser.data?.user };
+  return {
+    isLoading: authUser.isLoading,
+    authUser: authUser.data?.user,
+    refetch: authUser.refetch,
+  };
 };
 export default useAuthUser;
