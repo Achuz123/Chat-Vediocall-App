@@ -29,22 +29,23 @@ export const completeOnboarding = async (onboardingData) => {
   return res.data;
 };
 
-export const getfriends = async () => {
-  const res = await axiosInstance.get("/users/friends");
-  return res.data;
-};
+export async function getUserFriends() {
+  const response = await axiosInstance.get("/users/friends");
+  return response.data;
+}
 
-export const getRecommendedFriends = async () => {
-  const res = await axiosInstance.get("/users");
-  return res.data;
-};
+export async function getRecommendedUsers() {
+  const response = await axiosInstance.get("/users");
+  return response.data;
+}
 
-export const outgoingFriendRequest = async () => {
-  const res = await axiosInstance.get("/users/outgoing-friend-requests");
-  return res.data;
-};
+export async function getOutgoingFriendReqs() {
+  const response = await axiosInstance.get("/users/outgoing-friend-requests");
 
-export const sendFriendRequest = async (userId) => {
-  const res = await axiosInstance.post(`/users/friend-request/${userId}`);
-  return res.data;
-};
+  return response.data;
+}
+
+export async function sendFriendRequest(userId) {
+  const response = await axiosInstance.post(`/users/friend-request/${userId}`);
+  return response.data;
+}

@@ -126,26 +126,25 @@ export async function acceptFriendRequest(req, res) {
   }
 }
 
-export async function getFriendRequest(req, res) {
+export async function getFriendRequests(req, res) {
   try {
-    const request = await FriendRequest.find({
-      $and: [{ recipient: req.user.id }, { status: "pending" }],
+    const incomingReqs = await FriendRequest.find({
+      recipient: req.user.id,
+      status: "pending",
     }).populate(
       "sender",
-      "fullName profilePic nativeLanguage learningLanguage "
+      "fullName profilePic nativeLanguage learningLanguage"
     );
 
-    const acceptedRequest = await FriendRequest.find({
-      $and: [{ recipient: req.user.id }, { status: "accepted" }],
-    }).populate(
-      "sender",
-      "fullName profilePic nativeLanguage learningLanguage "
-    );
+    const acceptedReqs = await FriendRequest.find({
+      sender: req.user.id,
+      status: "accepted",
+    }).populate("recipient", "fullName profilePic");
 
-    res.status(200).json({ request, acceptedRequest });
+    res.status(200).json({ incomingReqs, acceptedReqs });
   } catch (error) {
-    console.error("Error fetching friend requests:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.log("Error in getPendingFriendRequests controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 }
 

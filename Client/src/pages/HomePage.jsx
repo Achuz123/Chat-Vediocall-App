@@ -1,11 +1,11 @@
-import React, { use, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
-  getfriends,
-  getRecommendedFriends,
-  outgoingFriendRequest,
+  getOutgoingFriendReqs,
+  getRecommendedUsers,
+  getUserFriends,
   sendFriendRequest,
-} from "../lib/api.js";
+} from "../lib/api";
 import { Link } from "react-router";
 import {
   CheckCircleIcon,
@@ -14,47 +14,45 @@ import {
   UsersIcon,
 } from "lucide-react";
 
-import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { getLanguageFlag } from "../components/FriendCard.jsx";
-import { capitialize } from "../lib/utils.js";
+import { capitialize } from "../lib/utils";
+
+import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
-
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
 
-  const { data: friends = [], isLoading: loadFriends } = useQuery({
+  const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
-    queryFn: getfriends,
-  });
-  const { data: recc, isLoading: reccUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: getRecommendedFriends,
+    queryFn: getUserFriends,
   });
 
-  const { data: request, isLoading: reqUsers } = useQuery({
-    queryKey: ["requests"],
-    queryFn: outgoingFriendRequest,
+  const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({
+    queryKey: ["users"],
+    queryFn: getRecommendedUsers,
+  });
+
+  const { data: outgoingFriendReqs } = useQuery({
+    queryKey: ["outgoingFriendReqs"],
+    queryFn: getOutgoingFriendReqs,
   });
 
   const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["requests"]);
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
   });
 
   useEffect(() => {
-    const outgoingId = new Set();
-    if (request && request.length > 0) {
-      request.forEach((req) => {
-        outgoingId.add(req.id);
-      });
-      setOutgoingReq(outgoingId);
-    }
-  }, [request]);
+    const outgoingIds = new Set();
 
+    outgoingFriendReqs.requests.forEach((req) => {
+      console.log("Processing req:", req);
+      outgoingIds.add(req.recipient._id);
+    });
+
+    setOutgoingRequestsIds(outgoingIds);
+  }, [outgoingFriendReqs]);
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
@@ -68,7 +66,7 @@ const HomePage = () => {
           </Link>
         </div>
 
-        {loadFriends ? (
+        {loadingFriends ? (
           <div className="flex justify-center py-12">
             <span className="loading loading-spinner loading-lg" />
           </div>
@@ -102,11 +100,11 @@ const HomePage = () => {
             </div>
           </div>
 
-          {reccUsers ? (
+          {loadingUsers ? (
             <div className="flex justify-center py-12">
               <span className="loading loading-spinner loading-lg" />
             </div>
-          ) : recc.length === 0 ? (
+          ) : recommendedUsers.length === 0 ? (
             <div className="card bg-base-200 p-6 text-center">
               <h3 className="font-semibold text-lg mb-2">
                 No recommendations available
@@ -117,7 +115,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recc.map((user) => {
+              {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
                 return (
