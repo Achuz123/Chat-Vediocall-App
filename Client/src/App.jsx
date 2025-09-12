@@ -10,7 +10,7 @@ import NotificationsPage from "./pages/NotificationsPage.jsx";
 import toast, { Toaster } from "react-hot-toast";
 import PageLoader from "./components/PageLoader.jsx";
 import Layout from "./components/Layout.jsx";
-
+import FriendPage from "./pages/FriendPage.jsx";
 import useAuthUser from "./hooks/useAuthUser.js";
 import { useThemeStore } from "./store/useThemeStore.js";
 
@@ -109,7 +109,21 @@ const App = () => {
             )
           }
         />
+
+        <Route
+          path="/friends"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <FriendPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
       </Routes>
+
       <Toaster />
     </div>
   );
